@@ -3,6 +3,9 @@ import { useState } from 'react';
 const words = ['МОРЕ', 'ЛІТО', 'КНИГА', 'СОНЦЕ', 'ДЕРЕВО'];
 
 function shuffleWord(word) {
+    if (!word || word.length === 0) {
+        return word; // якщо слово порожнє, повертаємо як є
+    }
     return word.split('').sort(() => Math.random() - 0.5).join('');
 }
 
