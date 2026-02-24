@@ -1,0 +1,326 @@
+.game-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+  }
+  
+  .game-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .game-title {
+    font-size: 2.5em;
+    color: #4a5568;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .progress {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+  }
+  
+  /* АДАПТИВНИЙ РОЗМІР - ТЕПЕР МЕНШИЙ */
+  .scrambled-word {
+    font-size: clamp(1.8rem, 8vw, 3rem); /* ← ЗМЕНШЕНО з 4rem до 3rem */
+    letter-spacing: 0.1em; /* ← ЗМЕНШЕНО інтервал */
+    color: #2d3748;
+    margin: 30px 0;
+    text-transform: uppercase;
+    font-weight: 800;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s infinite;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.3;
+    padding: 0 10px; /* ← ДОДАНО відступи з боків */
+  }
+  
+  /* Для дуже довгих слів */
+  .scrambled-word.long-word {
+    font-size: clamp(1.3rem, 6vw, 2.2rem); /* ← ЩЕ МЕНШЕ */
+    letter-spacing: 0.05em;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+  
+  .input-group {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .game-input {
+    padding: 15px 20px;
+    font-size: 1.2em;
+    border: 3px solid #e2e8f0;
+    border-radius: 50px;
+    width: 250px;
+    transition: all 0.3s;
+    outline: none;
+    text-align: center;
+    max-width: 100%;
+  }
+  
+  .game-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    transform: scale(1.02);
+  }
+  
+  .game-button {
+    padding: 15px 30px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  
+  .game-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  @media (max-width: 500px) {
+    .game-button {
+      padding: 12px 20px;
+      font-size: 1em;
+      white-space: normal;
+    }
+  }
+  
+  .check-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  .check-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  }
+  
+  .next-btn {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+  }
+  
+  .next-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.5);
+  }
+  
+  .restart-btn {
+    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+    color: white;
+    font-size: 1.2em;
+    padding: 15px 40px;
+  }
+  
+  .result {
+    font-size: 1.5em; /* ← ЗМЕНШЕНО */
+    margin: 20px 0;
+    font-weight: 600;
+    animation: popIn 0.3s ease-out;
+    word-break: break-word;
+    text-align: center;
+    min-height: 2em; /* ← ДОДАНО щоб не стрибав інтерфейс */
+  }
+  
+  @keyframes popIn {
+    from {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .correct {
+    color: #48bb78;
+    text-shadow: 0 2px 10px rgba(72, 187, 120, 0.3);
+  }
+  
+  .incorrect {
+    color: #f56565;
+    text-shadow: 0 2px 10px rgba(245, 101, 101, 0.3);
+  }
+  
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #718096;
+    flex-wrap: wrap;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .stat-icon {
+    font-size: 1.5em;
+  }
+  
+  .hint-text {
+    color: #a0aec0;
+    font-size: 0.9em;
+    margin-top: 10px;
+    font-style: italic;
+    word-break: break-word;
+    text-align: center;
+  }
+  
+  /* Game Over Screen */
+  .game-over {
+    text-align: center;
+  }
+  
+  .game-over-title {
+    font-size: clamp(1.8rem, 8vw, 2.5em);
+    color: #4a5568;
+    margin-bottom: 30px;
+    animation: bounce 1s ease infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .score-display {
+    font-size: 1.8em;
+    margin: 20px 0;
+    word-break: break-word;
+  }
+  
+  .score-number {
+    font-weight: 800;
+    color: #667eea;
+  }
+  
+  .attempts-number {
+    color: #48bb78;
+  }
+  
+  /* Стилі для правил */
+  .rules-card {
+    max-width: 700px;
+  }
+  
+  .rules-content {
+    text-align: left;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 15px;
+    margin: 20px 0;
+  }
+  
+  .rules-list {
+    padding-left: 20px;
+    margin: 10px 0;
+  }
+  
+  .rules-list li {
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+  
+  /* Таймер */
+  .timer {
+    font-size: clamp(1.2rem, 5vw, 1.5rem);
+    font-weight: bold;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 15px;
+    border-radius: 50px;
+    white-space: nowrap;
+  }
+  
+  /* Адаптивність для мобільних */
+  @media (max-width: 500px) {
+    .game-card {
+      padding: 20px;
+    }
+    
+    .game-title {
+      font-size: 1.8em;
+    }
+    
+    .stats {
+      gap: 15px;
+      font-size: 1em;
+    }
+    
+    .scrambled-word {
+      margin: 20px 0;
+      font-size: clamp(1.5rem, 7vw, 2.5rem); /* ← ЩЕ МЕНШЕ на мобілках */
+    }
+    
+    .input-group {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .game-input {
+      width: 100%;
+    }
+    
+    .game-button {
+      width: 100%;
+      margin: 5px 0;
+    }
+  }
