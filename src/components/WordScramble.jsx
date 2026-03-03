@@ -1,25 +1,8 @@
-import { useState, useEffect } from 'react';
+import { shuffleWord } from '../utils/shuffle';
+import { useState, useEffect, useCallback} from 'react';
 import { rounds } from '../data/words';
 import './WordScramble.css';
 
-// Функція для перемішування літер
-export function shuffleWord(word) {
-    if (!word || word.length === 0) return word;
-    
-    let letters = word.split('');
-    if (letters.length <= 1) return word;
-    
-    let shuffled;
-    let attempts = 0;
-    const maxAttempts = 10;
-    
-    do {
-        shuffled = [...letters].sort(() => Math.random() - 0.5);
-        attempts++;
-    } while (shuffled.join('') === word && attempts < maxAttempts);
-    
-    return shuffled.join('');
-}
 
 // Час на раунд (в секундах)
 const roundTime = [15, 20, 30, 45, 60];
@@ -39,13 +22,17 @@ function WordScramble() {
     const [timeLeft, setTimeLeft] = useState(roundTime[0]);
     const [timerActive, setTimerActive] = useState(false);
 
+    // Змінні оточення
+    const appStatus = import.meta.env.VITE_APP_STATUS;
+    const appVersion = import.meta.env.VITE_APP_VERSION;
+
     // Вибрати 10 випадкових слів з раунду
-    const getRandomWords = (roundIndex) => {
+    const getRandomWords = useCallback((roundIndex) => {
         const allWords = rounds[roundIndex].words;
         // Перемішуємо і беремо перші 10
         const shuffled = [...allWords].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, 10);
-    };
+    }, []);
 
     const startGame = () => {
         setGameStarted(true);
@@ -66,26 +53,20 @@ function WordScramble() {
     const currentWord = roundWords[currentIndex]?.word || '';
     const scrambled = shuffleWord(currentWord);
 
-    // Таймер
-    useEffect(() => {
-        if (!timerActive || gameFinished || !gameStarted) return;
-        
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    // Час вийшов - переходимо до наступного слова
-                    clearInterval(timer);
-                    handleTimeout();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
+ // Перехід до наступного раунду
+    const nextRound = useCallback(() => {
+        const nextRoundIndex = currentRound + 1;
+        setCurrentRound(nextRoundIndex);
+        setRoundWords(getRandomWords(nextRoundIndex));
+        setCurrentIndex(0);
+        setUserInput('');
+        setResult('');
+        setRoundScore(0);
+        setTimeLeft(roundTime[nextRoundIndex]);
+        setTimerActive(true);
+  }, [currentRound, getRandomWords]);
 
-        return () => clearInterval(timer);
-    }, [timerActive, currentRound, currentIndex, gameFinished, gameStarted]);
-
-    const handleTimeout = () => {
+    const handleTimeout = useCallback(() => {
         setResult('⏰ Час вийшов!');
         setAttempts(attempts + 1);
         setTimerActive(false);
@@ -107,20 +88,28 @@ function WordScramble() {
                 }
             }
         }, 1500);
-    };
+    }, [currentIndex, currentRound, roundWords.length, attempts, nextRound]);
 
-    // Перехід до наступного раунду
-    const nextRound = () => {
-        const nextRoundIndex = currentRound + 1;
-        setCurrentRound(nextRoundIndex);
-        setRoundWords(getRandomWords(nextRoundIndex));
-        setCurrentIndex(0);
-        setUserInput('');
-        setResult('');
-        setRoundScore(0);
-        setTimeLeft(roundTime[nextRoundIndex]);
-        setTimerActive(true);
-    };
+
+    // Таймер
+    useEffect(() => {
+        if (!timerActive || gameFinished || !gameStarted) return;
+        
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    // Час вийшов - переходимо до наступного слова
+                    clearInterval(timer);
+                    handleTimeout();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timerActive, currentRound, currentIndex, gameFinished, gameStarted, handleTimeout]);
+
 
     const checkAnswer = () => {
         if (!timerActive) return;
@@ -346,7 +335,27 @@ function WordScramble() {
                         <span>Спроба: {attempts}</span>
                     </div>
                 </div>
-            </div>
+		{/* Футер з інформацією про режим */}
+		<div style={{
+  		    marginTop: '30px',
+  		    paddingTop: '20px',
+  		    borderTop: '1px solid #e2e8f0',
+  		    fontSize: '14px',
+  		    color: '#718096',
+  		    display: 'flex',
+  		    justifyContent: 'space-between',
+		    alignItems: 'center'
+		}}>
+  		    <span>Версія: {appVersion}</span>
+  		    <span style={{
+    			color: appStatus === 'production' ? '#48bb78' : '#f56565',
+    			fontWeight: 'bold',
+    			textTransform: 'uppercase'
+  		}}>
+    			{appStatus === 'production' ? '🚀 PRODUCTION' : '🔧 DEVELOPMENT'}
+  		</span>
+	</div>
+   	</div>
         </div>
     );
 }
