@@ -1,3 +1,7 @@
+[![CI/CD Pipeline](https://github.com/maksymbarandiy/word-scramble-game/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/maksymbarandiy/word-scramble-game/actions/workflows/ci-cd.yml)
+
+## 🚀 Жива версія
+Спробуйте гру онлайн: [word-scramble-game-flame.vercel.app](https://word-scramble-game-flame.vercel.app)
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
