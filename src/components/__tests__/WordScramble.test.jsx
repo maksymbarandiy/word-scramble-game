@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { shuffleWord } from '../WordScramble';
+import { shuffleWord } from '../../utils/shuffle';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import WordScramble from '../WordScramble';
