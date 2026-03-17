@@ -2,6 +2,7 @@ import { shuffleWord } from '../utils/shuffle';
 import { useState, useEffect, useCallback} from 'react';
 import { rounds } from '../data/words';
 import './WordScramble.css';
+import posthog from 'posthog-js';
 
 
 // Час на раунд (в секундах)
@@ -22,6 +23,14 @@ function WordScramble() {
     const [timeLeft, setTimeLeft] = useState(roundTime[0]);
     const [timerActive, setTimerActive] = useState(false);
 
+    const isDarkMode = posthog.isFeatureEnabled('dark-mode-enabled');
+
+    const cardStyle = {
+    	backgroundColor: isDarkMode ? '#1a202c' : 'rgba(255, 255, 255, 0.95)',
+    	color: isDarkMode ? '#f7fafc' : '#2d3748'
+};
+
+
     // Змінні оточення
     const appStatus = import.meta.env.VITE_APP_STATUS;
     const appVersion = import.meta.env.VITE_APP_VERSION;
@@ -35,6 +44,10 @@ function WordScramble() {
     }, []);
 
     const startGame = () => {
+	posthog.capture('game_started', {
+        total_words: 50,
+        rounds_count: 5
+    });
         setGameStarted(true);
         setShowRules(false);
         setRoundWords(getRandomWords(0));
@@ -67,6 +80,11 @@ function WordScramble() {
   }, [currentRound, getRandomWords]);
 
     const handleTimeout = useCallback(() => {
+        posthog.capture('timeout_occurred', {
+        word: currentWord,
+        round: currentRound + 1,
+        time_limit: roundTime[currentRound]
+    });
         setResult('⏰ Час вийшов!');
         setAttempts(attempts + 1);
         setTimerActive(false);
@@ -88,7 +106,7 @@ function WordScramble() {
                 }
             }
         }, 1500);
-    }, [currentIndex, currentRound, roundWords.length, attempts, nextRound]);
+    }, [currentIndex, currentRound, roundWords.length, attempts, nextRound, currentWord]);
 
 
     // Таймер
@@ -122,6 +140,12 @@ function WordScramble() {
         }
 
         if (trimmedInput === currentWord) {
+	    posthog.capture('answer_correct', {
+            word: currentWord,
+            round: currentRound + 1,
+            word_length: currentWord.length,
+            attempts_for_word: attempts // скільки спроб було до цього
+    });
             setResult('✅ Правильно!');
             setScore(score + 1);
             setRoundScore(roundScore + 1);
@@ -146,6 +170,12 @@ function WordScramble() {
                 }
             }, 1000);
         } else {
+	    posthog.capture('answer_wrong', {
+            word: currentWord,
+            round: currentRound + 1,
+            user_input: trimmedInput,
+            hint_shown: true // чи показувалась підказка
+    });
             setResult(`❌ Спробуй ще! (Підказка: ${roundWords[currentIndex].hint})`);
             setAttempts(attempts + 1);
         }
@@ -221,6 +251,12 @@ function WordScramble() {
     }
 
     if (gameFinished) {
+        posthog.capture('game_completed', {
+        total_score: score,
+        total_attempts: attempts,
+        accuracy: Math.round((score / attempts) * 100),
+        rounds_completed: 5 // завжди 5 раундів
+    });
         return (
             <div className="game-container">
                 <div className="game-card game-over">
@@ -238,11 +274,27 @@ function WordScramble() {
         );
     }
     
-    return (
-        <div className="game-container">
-            <div className="game-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <h1 className="game-title" style={{ margin: 0 }}>🎯 Вгадай слово</h1>
+     return (
+    <div className="game-container">
+        <div className="game-card" style={cardStyle}>  
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h1 className="game-title" style={{ margin: 0, color: isDarkMode ? '#f7fafc' : '#4a5568' }}>🎯 Вгадай слово</h1>
+                <div style={{ display: 'flex', gap: '10px' }}>  
+                    <button 
+                        onClick={() => alert('Прапорець керується через PostHog! Зайди в Feature Flags')}
+                        style={{
+                            background: 'none',
+                            border: '1px solid ' + (isDarkMode ? '#4a5568' : '#e2e8f0'),
+                            borderRadius: '5px',
+                            padding: '5px 10px',
+                            cursor: 'pointer',
+                            fontSize: '20px',
+                            color: isDarkMode ? '#f7fafc' : '#2d3748'
+                        }}
+                        title="Темна тема (керується через PostHog)"
+                    >
+                        {isDarkMode ? '🌙' : '☀️'}
+                    </button>
                     <button 
                         onClick={restartGame} 
                         style={{
@@ -257,6 +309,7 @@ function WordScramble() {
                         🏠
                     </button>
                 </div>
+            </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <p className="progress">
