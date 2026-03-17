@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback} from 'react';
 import { rounds } from '../data/words';
 import './WordScramble.css';
 import posthog from 'posthog-js';
-І
+
 
 // Час на раунд (в секундах)
 const roundTime = [15, 20, 30, 45, 60];
@@ -30,15 +30,7 @@ function WordScramble() {
     	color: isDarkMode ? '#f7fafc' : '#2d3748'
 };
 
-    // Стилі для тексту
-	const textStyle = {
-      		color: isDarkMode ? '#e2e8f0' : '#4a5568'
-};
 
-// Стилі для прогресу
-	const progressStyle = {
-    	color: isDarkMode ? '#90cdf4' : '#667eea'
-};
     // Змінні оточення
     const appStatus = import.meta.env.VITE_APP_STATUS;
     const appVersion = import.meta.env.VITE_APP_VERSION;
@@ -114,7 +106,7 @@ function WordScramble() {
                 }
             }
         }, 1500);
-    }, [currentIndex, currentRound, roundWords.length, attempts, nextRound]);
+    }, [currentIndex, currentRound, roundWords.length, attempts, nextRound, currentWord]);
 
 
     // Таймер
