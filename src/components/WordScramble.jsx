@@ -1,8 +1,9 @@
 import { shuffleWord } from '../utils/shuffle';
-import { useState, useEffect, useCallback} from 'react';
+import { useState, useEffect, useCallback, useRef} from 'react';
 import { rounds } from '../data/words';
 import './WordScramble.css';
 import posthog from 'posthog-js';
+import * as Sentry from '@sentry/react';
 
 
 // Час на раунд (в секундах)
@@ -22,6 +23,31 @@ function WordScramble() {
     const [roundScore, setRoundScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(roundTime[0]);
     const [timerActive, setTimerActive] = useState(false);
+    const inputRef = useRef(null);
+
+    // Генерація або отримання унікального ID для сесії
+    const [userId] = useState(() => {
+    let id = localStorage.getItem('game_user_id');
+    if (!id) {
+        id = 'user_' + Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('game_user_id', id);
+    }
+    return id;
+});
+	// Змінні оточення 
+	const appStatus = import.meta.env.VITE_APP_STATUS;
+	const appVersion = import.meta.env.VITE_APP_VERSION;
+
+	// Встановлюємо контекст користувача в Sentry
+	useEffect(() => {
+   	 Sentry.setUser({
+        	id: userId,
+        	email: `player_${userId}@example.com`,
+        	segment: 'anonymous_player',
+        	game_version: appVersion,
+        	total_games_played: score > 0 ? 'active' : 'new'
+    	});
+	}, [userId]);
 
     const isDarkMode = posthog.isFeatureEnabled('dark-mode-enabled');
 
@@ -30,10 +56,6 @@ function WordScramble() {
     	color: isDarkMode ? '#f7fafc' : '#2d3748'
 };
 
-
-    // Змінні оточення
-    const appStatus = import.meta.env.VITE_APP_STATUS;
-    const appVersion = import.meta.env.VITE_APP_VERSION;
 
     // Вибрати 10 випадкових слів з раунду
     const getRandomWords = useCallback((roundIndex) => {
@@ -110,8 +132,14 @@ function WordScramble() {
 
 
     // Таймер
+    // Ефект для фокусу на полі введення
     useEffect(() => {
-        if (!timerActive || gameFinished || !gameStarted) return;
+   	     if (timerActive && !gameFinished && !showRules) {
+             inputRef.current?.focus();
+    	}
+	}, [timerActive, currentIndex, showRules, gameFinished]);
+    useEffect(() => {
+        if (!timerActive || gameFinished || !gameStarted)return;
         
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
@@ -206,6 +234,8 @@ function WordScramble() {
         setGameStarted(false);
         setShowRules(true);
         setTimerActive(false);
+        // Очищаємо контекст користувача при перезапуску
+        Sentry.setUser(null);
     };
 
     if (showRules) {
@@ -280,6 +310,22 @@ function WordScramble() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h1 className="game-title" style={{ margin: 0, color: isDarkMode ? '#f7fafc' : '#4a5568' }}>🎯 Вгадай слово</h1>
                 <div style={{ display: 'flex', gap: '10px' }}>  
+		 {/* Тестова кнопка для Sentry */}
+    		<button 
+        		onClick={() => { throw new Error("New alert test issue"); }}
+        		style={{
+       		     	background: 'none',
+            		border: '1px solid ' + (isDarkMode ? '#4a5568' : '#e2e8f0'),
+            		borderRadius: '5px',
+            		padding: '5px 10px',
+            		cursor: 'pointer',
+            		fontSize: '16px',
+            		color: isDarkMode ? '#f7fafc' : '#2d3748'
+        		}}
+        		title="Тестова помилка Sentry"
+    		>
+        		💣 Test Error
+    		</button>
                     <button 
                         onClick={() => alert('Прапорець керується через PostHog! Зайди в Feature Flags')}
                         style={{
@@ -335,6 +381,7 @@ function WordScramble() {
                 
                 <div className="input-group">
                     <input
+			ref={inputRef}  
                         type="text"
                         value={userInput}
                         onChange={(e) => setUserInput(e.target.value)}
@@ -407,6 +454,9 @@ function WordScramble() {
   		}}>
     			{appStatus === 'production' ? '🚀 PRODUCTION' : '🔧 DEVELOPMENT'}
   		</span>
+		<div style={{ fontSize: '12px', color: '#a0aec0', marginTop: '10px', textAlign: 'center' }}>
+    			🆔 User ID: {userId}
+		</div>
 	</div>
    	</div>
         </div>
