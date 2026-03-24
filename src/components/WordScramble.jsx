@@ -46,6 +46,10 @@ function WordScramble() {
     	});
 	}, [userId]);
 
+	// Змінні оточення 
+	const appStatus = import.meta.env.VITE_APP_STATUS;
+	const appVersion = import.meta.env.VITE_APP_VERSION;
+
     const isDarkMode = posthog.isFeatureEnabled('dark-mode-enabled');
 
     const cardStyle = {
@@ -53,10 +57,6 @@ function WordScramble() {
     	color: isDarkMode ? '#f7fafc' : '#2d3748'
 };
 
-
-    // Змінні оточення
-    const appStatus = import.meta.env.VITE_APP_STATUS;
-    const appVersion = import.meta.env.VITE_APP_VERSION;
 
     // Вибрати 10 випадкових слів з раунду
     const getRandomWords = useCallback((roundIndex) => {
