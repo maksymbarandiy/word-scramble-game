@@ -34,6 +34,9 @@ function WordScramble() {
     }
     return id;
 });
+	// Змінні оточення 
+	const appStatus = import.meta.env.VITE_APP_STATUS;
+	const appVersion = import.meta.env.VITE_APP_VERSION;
 
 	// Встановлюємо контекст користувача в Sentry
 	useEffect(() => {
@@ -45,10 +48,6 @@ function WordScramble() {
         	total_games_played: score > 0 ? 'active' : 'new'
     	});
 	}, [userId]);
-
-	// Змінні оточення 
-	const appStatus = import.meta.env.VITE_APP_STATUS;
-	const appVersion = import.meta.env.VITE_APP_VERSION;
 
     const isDarkMode = posthog.isFeatureEnabled('dark-mode-enabled');
 
